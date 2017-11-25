@@ -8,6 +8,8 @@ Now with proper localization and adjustable weekend:
 
 ![QlikSense Extension Timeline](Screenshot2.PNG)
 
+You can find a **supported version** with more features on the <a href="https://www.vizlib.com/marketplace">**Vizlib Marketplace**</a>.
+
 ## Dimensions:
 
 1. Dimension: Reference ID, numeric (Event ID or else) or String
