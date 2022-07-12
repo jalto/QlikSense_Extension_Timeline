@@ -438,6 +438,20 @@ define(["jquery", "qlik", "./scripts/vis-fix2628.min", "css!./styles/vis.min.css
                                         }],
                                         defaultValue: true
                                     },
+				    verticalScroll: {
+                                        ref: "verticalScroll",
+                                        type: "boolean",
+                                        component: "switch",
+                                        label: "Vertical Scroll Bar",
+                                        options: [{
+                                            value: true,
+                                            label: "On"
+                                        }, {
+                                            value: false,
+                                            label: "Off"
+                                        }],
+                                        defaultValue: false
+                                    },
                                     maxItems: {
                                         ref: "maxItems",
                                         type: "integer",
@@ -756,7 +770,22 @@ define(["jquery", "qlik", "./scripts/vis-fix2628.min", "css!./styles/vis.min.css
                     if (layout.visibleRangeMax && layout.visibleRangeMax != 0) options.max = dateFromQlikNumber(layout.visibleRangeMax);
                     if (layout.zoomMin && layout.zoomMin > 0) options.zoomMin = layout.zoomMin * 86400000;
                     if (layout.zoomMax && layout.zoomMax > 0) options.zoomMax = layout.zoomMax * 86400000;
+			
+		    if (layout.moveToTime && layout.moveToTime != 0) {
+		        options.start = dateFromQlikNumber(layout.moveToTime);
+		        options.end = dateFromQlikNumber(layout.moveToTime+7);
+		    }
+					
+		    if (layout.verticalScroll) {
+		        options.verticalScroll = true;
+		        options.preferZoom = true;
+		    }
+					
+		    if (layout.fixGroupHeight) {
+		        options.groupHeightMode = 'fixed';
+		    }
 
+                    //var timeline = new vis.Timeline(container, dataItems, groups, options);
                     var timeline = new vis.Timeline(container);
 
                     timeline.setOptions(options);
@@ -765,9 +794,12 @@ define(["jquery", "qlik", "./scripts/vis-fix2628.min", "css!./styles/vis.min.css
                     //console.log(timeline);
                     if (layout.fitAllInWindow) {
                         timeline.fit();
-                    } else if (layout.moveToTime && layout.moveToTime != 0) {
-                        timeline.moveTo(dateFromQlikNumber(layout.moveToTime));
-                    }
+                    } //else if (layout.moveToTime && layout.moveToTime != 0) {
+                        //timeline.moveTo(dateFromQlikNumber(layout.moveToTime));
+			//timeline.setWindow(dateFromQlikNumber(layout.moveToTime));
+			//console.log(timeline.getWindow());
+                    //}
+		    //console.log(timeline.getWindow());
                     $("#" + containerId).css('cursor', 'default');
 
                     timeline.on('select', function (properties) {
