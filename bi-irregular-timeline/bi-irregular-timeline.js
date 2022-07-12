@@ -7,7 +7,7 @@ Use at your own risk.
 */
 
 //loads a fixed vis.js, see: https://github.com/almende/vis/issues/2628
-define(["jquery", "qlik", "./scripts/vis-fix2628.min", "css!./styles/vis.min.css", "css!./styles/style.css"],
+define(["jquery", "qlik", "./vis-fix2628.min", "css!./vis.min.css", "css!./style.css"],
     function ($, qlik, vis) {
         'use strict';
     
