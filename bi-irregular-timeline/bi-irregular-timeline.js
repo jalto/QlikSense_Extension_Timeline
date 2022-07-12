@@ -18,8 +18,8 @@ define(["jquery", "qlik", "./scripts/vis-fix2628.min", "css!./styles/vis.min.css
                     qDimensions: [],
                     qMeasures: [],
                     qInitialDataFetch: [{
-                        qWidth: 8,
-                        qHeight: 1250
+                        qWidth: 10,
+                        qHeight: 1000
                     }]
                 }
             },
@@ -43,11 +43,13 @@ define(["jquery", "qlik", "./scripts/vis-fix2628.min", "css!./styles/vis.min.css
                     measures: {
                         uses: "measures",
                         min: 0,
-                        max: 3
+                        max: 5
                             /*
                                 1. Measure: title text for hover popup (optional)
                                 2. Measure: CSS class name for styling or number 1 to 10 for class color-a = "QlikSense dark blue" to color-j = "Qlik Sense dark red" (optional)
-                                3. Measure: group name to group items in swim lanes (optional)						
+                                3. Measure: group name to group items in swim lanes (optional)	
+				4. Measure: subgroup name to allow for subgroup stacking (optional)
+				5. Measure: subgroup order (optional)
                             */
                     },
                     sorting: {
@@ -112,6 +114,20 @@ define(["jquery", "qlik", "./scripts/vis-fix2628.min", "css!./styles/vis.min.css
                                         }],
                                         defaultValue: true
                                     },
+				    stackSubgroups: {
+                                        ref: "stackSubgroups",
+                                        type: "boolean",
+                                        component: "switch",
+                                        label: "Stack Subgroups",
+                                        options: [{
+                                            value: true,
+                                            label: "On"
+                                        }, {
+                                            value: false,
+                                            label: "Off"
+                                        }],
+                                        defaultValue: false
+                                    },
                                     groupSorting: {
                                         ref: "groupSorting",
                                         type: "string",
@@ -126,6 +142,35 @@ define(["jquery", "qlik", "./scripts/vis-fix2628.min", "css!./styles/vis.min.css
                                         }
                                         ],
                                         defaultValue: "A"
+                                    },
+				    subgroupSorting: {
+                                        ref: "subgroupSorting",
+                                        type: "string",
+                                        component: "dropdown",
+                                        label: "Group Sorting",
+                                        options: [{
+                                                value: 'A',
+                                                label: 'Ascending'
+                                        }, {
+                                                value: 'D',
+                                                label: 'Descending'
+                                        }
+                                        ],
+                                        defaultValue: "A"
+                                    },
+				    fixGroupHeight: {
+                                        ref: "fixGroupHeight",
+                                        type: "boolean",
+                                        component: "switch",
+                                        label: "Fix Group Height",
+                                        options: [{
+                                            value: true,
+                                            label: "On"
+                                        }, {
+                                            value: false,
+                                            label: "Off"
+                                        }],
+                                        defaultValue: false
                                     },
                                     localizeDate: {
                                         ref: "localizeDate",
@@ -509,8 +554,12 @@ define(["jquery", "qlik", "./scripts/vis-fix2628.min", "css!./styles/vis.min.css
                     id = layout.qInfo.qId,
                     containerId = 'timeline-container_' + id,
                     groupNames = [],
+		    subgroupNames = [],
+		    subgroupStack = [],
                     groups = {},
-                    useGroups = false;
+                    useGroups = false,
+		    useSubGroups = false,
+		    currentGroupName = [];
 
                 if (qData && qData.qMatrix) {
 
@@ -529,7 +578,38 @@ define(["jquery", "qlik", "./scripts/vis-fix2628.min", "css!./styles/vis.min.css
                         $.each(qData.qMatrix, function (i, e) {
                             if (e[7].qText && e[7].qText.trim() != '' && e[7].qText != '-') {
                                 if ($.inArray(e[7].qText, groupNames) == -1) {
-                                    groupNames.push(e[7].qText);
+				    currentGroupName = e[7].qText;
+				    if (layout.qHyperCube.qMeasureInfo.length > 3) {
+				        // create subgroups
+					    $.each(qData.qMatrix, function (j, f) {
+					    if (f[8].qText && f[8].qText.trim() != '' && f[8].qText != '-' && f[7].qText == currentGroupName) {
+						if ($.inArray(f[8].qText, subgroupNames) == -1) {
+						    subgroupNames.push("'" + f[8].qText);
+						}
+					    }
+					});
+					if (subgroupNames.length > 0) {
+					    // sort groups descending for nows
+					    if (layout.groupSorting == "A") {
+						subgroupNames.sort(function (a, b) {
+						    var x = a.toLowerCase(),
+						    y = b.toLowerCase();
+						    return x < y ? -1 : x > y ? 1 : 0;
+						});
+					    } else if (layout.groupSorting == "D") {
+						subgroupNames.sort(function (a, b) {
+						    var y = a.toLowerCase(),
+						    x = b.toLowerCase();
+						    return x < y ? -1 : x > y ? 1 : 0;
+						});
+					    }
+					    useSubGroups = true;
+					}
+					// create subgroupStack
+					subgroupStack.push(subgroupNames.join("':false, "));
+				    }
+				    groupNames.push(e[7].qText);
+				    subgroupNames = [];
                                 }
                             }
                         });
@@ -553,7 +633,11 @@ define(["jquery", "qlik", "./scripts/vis-fix2628.min", "css!./styles/vis.min.css
                             for (var g = 0; g < groupNames.length; g++) {
                                 groups.add({
                                     id: g,
-                                    content: groupNames[g]
+                                    content: groupNames[g],
+				    subgroupStack: "{" + subgroupStack[g] + "':false}",
+				    // subgroupOrder: function (a, b) {
+				    //	return a.subgroupOrder - b.subgroupOrder;
+				    // }
                                 });
                             }
                             useGroups = true;
@@ -626,6 +710,16 @@ define(["jquery", "qlik", "./scripts/vis-fix2628.min", "css!./styles/vis.min.css
                                         if (pos >= 0) dataItem.group = pos;
                                     }
                                 }
+				if (useSubGroups && e.length > 8) {
+                                    if (isTextCellNotEmpty(e[8])) {
+				        dataItem.subgroup=e[8].qText;
+                                    }
+                                }
+				if (useSubGroups && e.length > 9) {
+                                    if (isTextCellNotEmpty(e[9])) {
+				        dataItem.subgroupOrder=e[9].qNum;
+                                    }
+                                }
                             }
                         } else {
                             dataItem.title = dateFromQlikNumber(e[2].qNum);
@@ -652,6 +746,7 @@ define(["jquery", "qlik", "./scripts/vis-fix2628.min", "css!./styles/vis.min.css
                             item: layout.itemOrientation
                         },
                         stack: layout.stackItems,
+			stackSubgroups: layout.stackSubgroups,
                         //order: customOrder,
                         groupOrder: 'id',
                         rollingMode: layout.rollingMode
