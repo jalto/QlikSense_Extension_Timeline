@@ -750,8 +750,15 @@ define(["jquery", "qlik", "./scripts/vis-fix2628.min", "css!./styles/vis.min.css
                     //                        console.log("a", a.start, "b", b.start);
                     //                        return b.start.getMilliseconds() - a.start.getMilliseconds();
                     //                    }
+		    dataSet.sort(function (a, b) {
+                    	var y = b.id,
+                    		x = a.id;
+                    	return x < y ? -1 : x > y ? 1 : 0;
+		    });
 
                     var dataItems = new vis.DataSet(dataSet);
+			
+		    //console.log(dataItems);
                     var container = document.getElementById(containerId);
                     var options = {
                         editable: false,
@@ -764,6 +771,9 @@ define(["jquery", "qlik", "./scripts/vis-fix2628.min", "css!./styles/vis.min.css
                         stack: layout.stackItems,
 			stackSubgroups: layout.stackSubgroups,
                         //order: customOrder,
+			// order: function (a, b) {
+   			//    return b.id - a.id;
+			// },
                         groupOrder: 'id',
                         //rollingMode: layout.rollingMode
                     };
