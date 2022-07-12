@@ -705,18 +705,20 @@ define(["jquery", "qlik", "./vis-fix2628.min", "css!./vis.min.css", "css!./style
                                     if (layout.reverseColor) {
                                         if (dataItem.type == "background") {
                                             if (layout.backgroundCss) {
-                                                dataItem.className = "color-bg-" + String.fromCharCode(107 - Math.max(1, Math.min(10, e[6].qNum)));
+                                                //dataItem.className = "color-bg-" + String.fromCharCode(107 - Math.max(1, Math.min(10, e[6].qNum)));
+						dataItem.className = String.fromCharCode(107 - Math.max(1, Math.min(11, e[6].qNum)));
                                             }
                                         } else {
-                                            dataItem.className = "color-" + String.fromCharCode(107 - Math.max(1, Math.min(10, e[6].qNum)));
+                                            dataItem.className = "color-" + String.fromCharCode(107 - Math.max(1, Math.min(16, e[6].qNum)));
                                         }
                                     } else {
                                         if (dataItem.type == "background") {
                                             if (layout.backgroundCss) {
-                                                dataItem.className = "color-bg-" + String.fromCharCode(96 + Math.max(1, Math.min(10, e[6].qNum)));
+                                                //dataItem.className = "color-bg-" + String.fromCharCode(96 + Math.max(1, Math.min(10, e[6].qNum)));
+						dataItem.className = String.fromCharCode(96 + Math.max(1, Math.min(14, e[6].qNum)));
                                             }
                                         } else {
-                                            dataItem.className = "color-" + String.fromCharCode(96 + Math.max(1, Math.min(10, e[6].qNum)));
+                                            dataItem.className = "color-" + String.fromCharCode(96 + Math.max(1, Math.min(16, e[6].qNum)));
                                         }
                                     }
                                 }
