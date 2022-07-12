@@ -482,6 +482,7 @@ define(["jquery", "qlik", "./scripts/vis-fix2628.min", "css!./styles/vis.min.css
                                             return layout.fitAllInWindow != 1;
                                         }
                                     },
+				    /*
                                     rollingMode: {
                                         ref: "rollingMode",
                                         type: "boolean",
@@ -496,6 +497,7 @@ define(["jquery", "qlik", "./scripts/vis-fix2628.min", "css!./styles/vis.min.css
                                         }],
                                         defaultValue: false
                                     },
+				    */
                                     visibleRangeMin: {
                                         ref: "visibleRangeMin",
                                         type: "number",
@@ -763,7 +765,7 @@ define(["jquery", "qlik", "./scripts/vis-fix2628.min", "css!./styles/vis.min.css
 			stackSubgroups: layout.stackSubgroups,
                         //order: customOrder,
                         groupOrder: 'id',
-                        rollingMode: layout.rollingMode
+                        //rollingMode: layout.rollingMode
                     };
 
                     if (layout.visibleRangeMin && layout.visibleRangeMin != 0) options.min = dateFromQlikNumber(layout.visibleRangeMin);
